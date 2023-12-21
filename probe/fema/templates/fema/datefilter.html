@@ -1,0 +1,297 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible"content="IE=edge">
+	<meta name="viewport"content="width=device-width, 
+				initial-scale=1.0">
+	<title>Probe Agile data</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+	{% comment %} <link rel="stylesheet" href="{% static 'css/responsive.css' %}">   {% endcomment %}
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	{% comment %} <script type="text/javascript" src="{% static 'js/script.js' %}"></script> {% endcomment %}
+	<style>
+        #date-range-filter {
+            display: none;
+        } 
+	     #filterButton {
+			background-color: #4CAF50;
+			color: white;
+			padding: 1px;
+			border: none;
+			border-radius: 4px;
+			width:80px;
+		} 
+		#custom-date-form input[type="date"] {
+			border: 1px solid #ccc;
+			padding: 1px;
+			border-radius: 2px;
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+			width:135px;
+			height:23px;
+		}
+
+	    /* Style for the flash message */
+	 #error-message {
+		    position: relative; 
+			top: 0px;
+			left: 60%;
+			transform: translateX(-50%);
+			background-color: #ff0000; /* Set your desired background color */
+			color: #ffffff; /* Set your desired text color */
+			padding: 10px;
+			border-radius: 5px;
+			z-index: 1000;
+		}
+	
+    </style>
+</head>
+
+<body>
+
+	<!-- for header part -->
+	<header>
+		
+		<div>
+			
+			<div class="Home" style="margin-top:20px;"><img src="{% static 'image/home.png' %}"class="home-img">
+				<a href="{% url 'count_colour' %}">HOME</a></div>
+
+		</div>
+
+		<div class="logosec">
+			<div class="logo"style="margin-top:-40px;">Data Extraction Status for Probe Agile Data Sources</div>
+
+		</div>
+
+	</header>
+
+	<div class="main-container">
+		<div class="navcontainer">
+			<nav class="nav">
+				<div class="nav-upper-options">
+					<div class="nav-option option1">
+						<img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210182148/Untitled-design-(29).png"
+							class="nav-img"alt="dashboard">
+						<h3>Dash Board </h3>
+					</div>
+					<br>
+	                
+
+					<div class="option2 nav-option">
+						
+        
+						<a href="{% url 'fema_datefilter' %}"><h3 >Fema </h3> </a>
+							
+					</div>
+
+					<div class="nav-option option2">
+		
+							<a href="{% url 'startup_datefilter' %}"><h3 >Startup_India </h3></a>
+					</div>
+
+					<div class="nav-option option2">
+						 
+							<a href="#"><h3 >Sample Data </h3></a>
+						
+					</div>
+
+					<div class="nav-option option2">
+						
+							<a href="#"> <h3 >Sample Data </h3></a>
+						
+				    </div>
+
+			</div>
+				
+		</nav>
+	</div>
+		<div class="main">
+
+			<div class="box-container">
+
+				   <div class="box box1 box_1" style="height:130px; width:100%;">
+					    <div class="text">
+							<P style="font-size:20px"> select the dates between &nbsp;&nbsp;"{{ min_date }}" &nbsp;&nbsp; to &nbsp;&nbsp; "{{ max_date }}" </p>
+							<label for="filter_options"><h4>Historic Data:</h4></label>
+							<select id="filter_options" onchange="toggleDateRangeFilter(this.value)">
+								<option value="" disabled selected>Select Results</option>
+								<option value="past_15_days">Past 15 Days</option>
+								<option value="last_month">Last Month</option>
+								<option value="custom">Custom Date Range</option>
+							</select>
+							{% if error_message %}
+							        <div id="error-message"  class="error-message">
+                                       {{ error_message }}
+                                   </div>
+                            {% endif %}
+
+							<!-- Custom date range filter -->
+							<div id="date-range-filter" style="margin-right:10px">
+								<form method="get" id="custom-date-form">
+									<label for="start_date">Start Date:</label>
+									<input type="date" id="start_date" name="start_date" required>
+
+									<label for="end_date">End Date:</label>
+									<input type="date" id="end_date" name="end_date" required>
+
+									<button type="submit" id="filterButton" onclick="applyCustomDateRangeFilter()">Filter</button>
+
+									<!-- Optional: Clear filter button -->
+									<!-- <button type="button" onclick="clearCustomDateRangeFilter()">Clear Filter</button> -->
+								</form>
+								
+							</div>
+												
+							{% comment %} <form method="get">
+								{{ date_range_form.as_p }}
+								<button type="submit">Apply Filter</button>
+								<a href="http://127.0.0.1:8000/fema/highlight/" style="font-size:20px; color: white;" >clear</a>
+							</form> {% endcomment %}
+					
+					</div>
+
+				</div>
+			
+
+		
+			</div>
+
+			<div class="report-container">
+				<div class="report-header">
+					<h1 class="recent-Articles" style="text-align: center;">Metric Report</h1>
+					<!-- <button class="view">View All</button> -->
+				</div>
+
+				<div class="report-body">
+					<div class="items">
+							
+						<table style="width:100%;">
+							
+							<tr>
+								<th>Table Name</th>
+								<th>Status</th>
+								<th>Data Scraped</th>
+								<th>Reason</th>
+								<th>Scraped On</th>
+							</tr>
+							
+							{% for entry in city_data %}
+								<tr>
+									<td>{{ entry.table_name }}</td>
+									<td>{{ entry.status }}</td>
+									<td>{{ entry.data_scraped }}</td>
+									<td>{{ entry.reason }}</td>
+									<td>{{ entry.scraped_at }}</td>
+								</tr>
+							{% endfor %}
+							
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+	<script>
+		function toggleDateRangeFilter(filterOption) {
+			const dateRangeFilter = document.getElementById('date-range-filter');
+	
+			if (filterOption === 'custom') {
+				dateRangeFilter.style.display = 'block';
+			} else {
+				dateRangeFilter.style.display = 'none';
+	
+				// Set the selected dates in the form for past_15_days and last_month
+				setDefaultDateRange(filterOption);
+	
+				// Submit the form to apply the filter for other options
+				document.querySelector('form').submit();
+			}
+		}
+	
+		function setDefaultDateRange(filterOption) {
+			const currentDate = new Date();
+			const startDateInput = document.getElementById('start_date');
+			const endDateInput = document.getElementById('end_date');
+	
+			if (filterOption === 'past_15_days') {
+				const past15DaysDate = new Date(currentDate - 15 * 24 * 60 * 60 * 1000);
+				startDateInput.valueAsDate = past15DaysDate;
+				endDateInput.valueAsDate = currentDate;
+			} else if (filterOption === 'last_month') {
+				const firstDayOfLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+				const lastDayOfLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+				startDateInput.valueAsDate = firstDayOfLastMonth;
+				endDateInput.valueAsDate = lastDayOfLastMonth;
+			}
+		}
+	
+		function applyCustomDateRangeFilter() {
+			const startDate = document.getElementById('start_date').value;
+			const endDate = document.getElementById('end_date').value;
+	
+			// Check if start date and end date are provided
+			if (!startDate || !endDate) {
+				alert('Please select both start and end dates.');
+				return;
+			}
+	
+			// Submit the form asynchronously
+			fetch('/fema/dropfilter/', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			.then(response => response.json())
+			.then(data => {
+				if ('error' in data) {
+					alert(data.error);
+				} else {
+					// If no error, submit the form
+					document.getElementById('custom-date-form').submit();
+				}
+			})
+			.catch(error => console.error('Error:', error));
+		}
+	
+		function clearCustomDateRangeFilter() {
+			const dateRangeFilter = document.getElementById('date-range-filter');
+			dateRangeFilter.style.display = 'none';
+	
+			// Clear the input values
+			document.getElementById('start_date').value = '';
+			document.getElementById('end_date').value = '';
+	
+			// Submit the form to apply the filter
+			document.querySelector('form').submit();
+		}
+		
+
+        // Function to hide the error message after a specified duration
+		function hideErrorMessage() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                setTimeout(function() {
+                    errorMessage.style.display = 'none';
+                }, 40000);  // 5000 milliseconds = 5 seconds
+            }
+        }
+        
+        // Call the function when the page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            hideErrorMessage();
+        });  
+	</script>
+		
+<footer>
+	<p>If any queries contact us : &nbsp;&nbsp;&nbsp;<a href="mailto:probepoc2023@gmail.com"
+		 style="color:white"> probepoc2023@gmail.com</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Example</title>
+    <style>
+        /* Style for the flash message */
+        #error-message {
+           
+            position: fixed;
+            top: 80px;
+            left: 30%;
+            transform: translateX(-50%);
+            background-color: #ff0000; /* Set your desired background color */
+            color: #ffffff; /* Set your desired text color */
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<label for="filter_options"><h4>Historic Data:</h4></label>
+<select id="filter_options" onchange="toggleDateRangeFilter(this.value)">
+    <option value="" disabled selected>Select Results</option>
+    <option value="past_15_days">Past 15 Days</option>
+    <option value="last_month">Last Month</option>
+    <option value="custom">Custom Date Range</option>
+</select>
+
+{% if error_message %}
+<div id="error-message" class="error-message">
+     {{ error_message }}
+</div>
+{% endif %}
+
+<P> selct the date {{ min_date }} between {{ max_date }}
+<!-- Custom date range filter -->
+<div id="date-range-filter" style="margin-right:10px">
+    <form method="get" id="custom-date-form">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required>
+
+        <button type="submit" id="filterButton" onclick="applyCustomDateRangeFilter()">Filter</button>
+
+        <!-- Optional: Clear filter button -->
+        <!-- <button type="button" onclick="clearCustomDateRangeFilter()">Clear Filter</button> -->
+    </form>
+  
+</div>
+
+<table style="width:100%;">
+    <tr>
+        <th>Table Name</th>
+        <th>Status</th>
+        <th>Data Scraped</th>
+        <th>Reason</th>
+        <th>Scraped On</th>
+    </tr>
+    {% for entry in city_data %}
+        <tr>
+            <td>{{ entry.table_name }}</td>
+            <td>{{ entry.status }}</td>
+            <td>{{ entry.data_scraped }}</td>
+            <td>{{ entry.reason }}</td>
+            <td>{{ entry.scraped_at }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<script>
+    function toggleDateRangeFilter(filterOption) {
+        const dateRangeFilter = document.getElementById('date-range-filter');
+
+        if (filterOption === 'custom') {
+            dateRangeFilter.style.display = 'block';
+        } else {
+            dateRangeFilter.style.display = 'none';
+
+            // Set the selected dates in the form for past_15_days and last_month
+            setDefaultDateRange(filterOption);
+
+            // Submit the form to apply the filter for other options
+            document.querySelector('form').submit();
+        }
+    }
+
+    function setDefaultDateRange(filterOption) {
+        const currentDate = new Date();
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        if (filterOption === 'past_15_days') {
+            const past15DaysDate = new Date(currentDate - 15 * 24 * 60 * 60 * 1000);
+            startDateInput.valueAsDate = past15DaysDate;
+            endDateInput.valueAsDate = currentDate;
+        } else if (filterOption === 'last_month') {
+            const firstDayOfLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+            const lastDayOfLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+            startDateInput.valueAsDate = firstDayOfLastMonth;
+            endDateInput.valueAsDate = lastDayOfLastMonth;
+        }
+    }
+
+    function applyCustomDateRangeFilter() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+
+         // Check if start date and end date are provided
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates.');
+            return;
+        }
+
+        // Submit the form asynchronously
+        fetch('/fema/dropfilter/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if ('error' in data) {
+                alert(data.error);
+            } else {
+                // If no error, submit the form
+                document.getElementById('custom-date-form').submit();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    } 
+
+    function clearCustomDateRangeFilter() {
+        const dateRangeFilter = document.getElementById('date-range-filter');
+        dateRangeFilter.style.display = 'none';
+
+        // Clear the input values
+        document.getElementById('start_date').value = '';
+        document.getElementById('end_date').value = '';
+
+        // Submit the form to apply the filter
+        document.querySelector('form').submit();
+    }
+
+    function hideErrorMessage() {
+        var errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            setTimeout(function() {
+                errorMessage.style.display = 'none';
+            }, 35000);  // 5000 milliseconds = 5 seconds
+        }
+    }
+    
+    // Call the function when the page loads
+    document.addEventListener("DOMContentLoaded", function() {
+        hideErrorMessage();
+    });
+</script>
+
+</body>
+</html>
