@@ -384,7 +384,7 @@ def newfema_datefilter(request):
         
             else:
                 error_message = 'No data available for the selected date range. please select available dates'
-                return render(request, 'fema/newdatefilter.html', {'error_message': error_message, 'min_date':min_date, 'max_date':max_date})
+                return render(request, 'fema/newdatefilter.html', {'error_message': error_message, 'min_date':min_date, 'max_date':max_date,'table_name_filter':table_name_filter})
 
 
     # Format the dates before passing them to the template
@@ -444,7 +444,7 @@ def newstartup_datefilter(request):
         
             else:
                 error_message = 'No data available for the selected date range. please select available dates'
-                return render(request, 'fema/newdatefilter.html', {'error_message': error_message, 'min_date':min_date, 'max_date':max_date})
+                return render(request, 'fema/newdatefilter.html', {'error_message': error_message, 'min_date':min_date, 'max_date':max_date,'table_name_filter':table_name_filter})
 
 
     # Format the dates before passing them to the template
